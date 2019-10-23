@@ -1,39 +1,13 @@
 %{
 #include<stdio.h>
 
-enum yytokentype{ 
-	NUM = 1,
-	BOOLLIT = 2,
-	IDENT = 3,
-	LP = 4,
-	RP = 5,
-	ASGN = 6,
-	SC = 7,
-	OP2 = 8,
-	OP3 = 9,
-	OP4 = 10,
-	IF = 11,
-	THEN = 12,
-	ELSE = 13,
-	BGN = 14,
-	END = 15,
-	WHILE = 16,
-	DO = 17,
-	PROGRAM = 18,
-	VAR = 19,
-	AS = 20,
-	INT = 21,
-	BOOL = 22,
-	READINT = 23,
-	WRITEINT = 24
-};
-
-char* yylval = "";
+#include"parser.tab.h"
 %}
 
 %%
 
 %.* {}
+[\t ] {}
 
 "("	return LP;
 ")"	return RP;
@@ -63,7 +37,7 @@ char* yylval = "";
 "false"|"true"	{yylval = yytext; return BOOLLIT;}
 [A-Za-z][0-9A-Za-z]*	{yylval = yytext; return IDENT;}
 %%
-
+/*
 int main()
 {
 	int ret = 0;
@@ -74,4 +48,4 @@ int main()
 		 yylval = "";
 	}
 }
-
+*/

@@ -24,11 +24,15 @@ int yywrap(void);
 %token INT
 %token BOOL
 %token WRITEINT
-%token READINT        
+%token READINT
+
+%token BOOLLIT
+%token NUM
+%token IDENT
 %%
 program : PROGRAM declarations BGN statementSequence END
 
-declarations : VAR ident AS type SC declarations
+declarations : VAR IDENT AS type SC declarations
                |
 	       ;
 
@@ -43,8 +47,8 @@ statement : assignment
             | whileStatement
             | writeInt
 
-assignment : ident ASGN expression
-             | ident ASGN READINT
+assignment : IDENT ASGN expression
+             | IDENT ASGN READINT
 
 ifStatement : IF expression THEN statementSequence elseClause END
 
@@ -65,22 +69,22 @@ simpleExpression : term OP3 term
 term : factor OP2 factor
        | factor
 
-factor : ident
-         | num
-         | boollit
+factor : IDENT
+         | NUM
+         | BOOLLIT
          | LP expression RP
 
 %%
 int main(void)
 {
- yyparse();
- return 0;
+	yyparse();
+	return 0;
 }
 int yywrap(void)
 {
- return 1;
+	return 1;
 }
 void yyerror(char* msg, ...)
 {
- printf("\nError Occurred\n");
+	printf("Error Occurred\n");
 }

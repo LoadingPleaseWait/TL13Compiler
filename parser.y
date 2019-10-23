@@ -4,9 +4,29 @@
 void yyerror(char*,...);
 int yywrap(void);
 %}
-%token KEY ID;
+%token BGN
+%token END
+%token VAR
+%token AS
+%token LP
+%token RP
+%token ASGN
+%token SC
+%token OP2
+%token OP3
+%token OP4
+%token IF
+%token THEN
+%token ELSE
+%token WHILE
+%token DO
+%token PROGRAM
+%token INT
+%token BOOL
+%token WRITEINT
+%token READINT        
 %%
-program : PROGRAM declarations BEGIN statementSequence END
+program : PROGRAM declarations BGN statementSequence END
 
 declarations : VAR ident AS type SC declarations
                |

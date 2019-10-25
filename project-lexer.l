@@ -7,7 +7,7 @@
 %%
 
 %.* {}
-[\t ] {}
+[\t\n ]+ {}
 
 "("	return LP;
 ")"	return RP;

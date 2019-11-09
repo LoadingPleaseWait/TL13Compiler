@@ -1,7 +1,7 @@
 %{
 #include<stdio.h>
 #include<stdlib.h>
-
+#include "bisonprint.h"
 void yyerror(char*);
 int yywrap(void);
 
@@ -150,13 +150,13 @@ statementSequence : statement SC statementSequence { $$ = new_statement_sequence
                     |
 		    ;
 
-statement : assignment { struct statement_t *statement = new_statement_t(4, $1, NULL, NULL, NULL); $$ = statement; }
-            | ifStatement { struct statement_t *statement = new_statement_t(4, NULL, $1, NULL, NULL); $$ = statement; }
-            | whileStatement { struct statement_t *statement = new_statement_t(4, NULL, NULL, $1, NULL); $$ = statement; }
-            | writeInt { struct statement_t *statement = new_statement_t(4, NULL, NULL, NULL, $1); $$ = statement; }
+statement : assignment { struct statement_t *statement = new_statement_t(0, $1, NULL, NULL, NULL); $$ = statement; }
+            | ifStatement { struct statement_t *statement = new_statement_t(1, NULL, $1, NULL, NULL); $$ = statement; }
+            | whileStatement { struct statement_t *statement = new_statement_t(2, NULL, NULL, $1, NULL); $$ = statement; }
+            | writeInt { struct statement_t *statement = new_statement_t(3, NULL, NULL, NULL, $1); $$ = statement; }
 
-assignment : IDENT ASGN expression { struct assignment_t *assignment = new_assignment_t(5, $1, $3); $$ = assignment; }
-             | IDENT ASGN READINT { struct assignment_t *assignment = new_assignment_t(5, $1, $3); $$ = assignment; }
+assignment : IDENT ASGN expression { struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
+             | IDENT ASGN READINT { struct assignment_t *assignment = new_assignment_t(1, $1, $3); $$ = assignment; }
 
 
 ifStatement : IF expression THEN statementSequence elseClause END { struct if_statement_t *if_statement_t = new_if_statement_t(6, $2, $4, $5); $$ = if_statement_t; }
@@ -212,7 +212,7 @@ struct program_t *new_program_t(int nodetype, struct declaration_t *l, struct st
 	return a;
 }
 
-struct declaration_t *new_declaration_t(int nodetype, char *ident, char *type, struct declaration_t *inner)
+struct declaration_t *new_declaration_t(int nodetype, char *ident, type_t *type, struct declaration_t *inner)
 {
 	struct declaration_t *return_val = malloc(sizeof(struct declaration_t));
 	
@@ -222,7 +222,7 @@ struct declaration_t *new_declaration_t(int nodetype, char *ident, char *type, s
 	}
 	return_val->nodetype = nodetype;
 	return_val->ident = ident;
-	return_val->type = type;
+	return_val->type = type->value;
 	return_val->inner = inner;
 	return return_val;
 }

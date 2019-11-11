@@ -114,6 +114,8 @@ void printExpression(struct expression_t *e)
     printf("Expression goes here");
 }
 
+
+
 struct program_t *new_program_t(int nodetype, struct declaration_t *l, struct statement_sequence_t *r)
 {
     struct program_t *a = malloc(sizeof(struct program_t));
@@ -143,7 +145,7 @@ struct declaration_t *new_declaration_t(int nodetype, char *ident, struct type_t
     return return_val;
 }
 
-struct type_t *new_type_t(int nodetype, char *value) {
+struct type_t *new_type_t(int nodetype) {
     struct type_t *return_val = malloc(sizeof(struct type_t));
     
     if(!return_val) {
@@ -151,7 +153,14 @@ struct type_t *new_type_t(int nodetype, char *value) {
         exit(0);
     }
     return_val->nodetype = nodetype;
-    return_val->value = value;
+    if(nodetype ==0)
+    {
+        return_val->value = "INT";
+    }
+    else
+    {
+        return_val->value = "BOOL";
+    }
     return return_val;
 }
 
@@ -286,7 +295,7 @@ struct term_t *new_term_t(int nodetype, struct factor_t *factor, struct factor_t
     return return_val;
 }
 
-struct factor_t *new_factor_t(int nodetype1, char *ident1, int num1, char *boollit1, struct expression_t *expression1) {
+struct factor_t *new_factor_t(int nodetype1, char *ident1, int num1, int boollit1, struct expression_t *expression1) {
     struct factor_t *return_val = malloc(sizeof(struct factor_t));
     
     if(!return_val) {

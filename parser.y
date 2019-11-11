@@ -5,10 +5,24 @@
     #include<stdlib.h>
     #include "bisonprint.h"
     #include "bisonnodes.h"
-    #include <glib.h>
-    GHashTable * syb = g_hash_table_new();
+    #include "uthash.h"
+    struct idHashable {
+        char * identify;
+        int init;
+        UT_hash_handle hh;
+    };
+    struct idHashable * idents, *s = NULL;
+    struct program_t * prgrm;
     
 %}
+
+%union {
+double iValue; /* double value */
+char * sIndex; /* symbol table index */
+int boolType; /*true or false*/
+void* NodePtr;
+}
+
 
 %token BGN
 %token END
@@ -32,29 +46,30 @@
 %token WRITEINT
 %token READINT
 
-%union {
-    double iValue; /* double value */
-    char sIndex; /* symbol table index */
-    int boolType; /*true or false*/
-    (void) *nPtr; /* node pointer */
-};
-
 %token <boolType> BOOLLIT
 %token <iValue> NUM
 %token <sIndex> IDENT
 
-%%
-program : PROGRAM declarations BGN statementSequence END { $$ = new_program_t(1, $2, $4); }
+%type <NodePtr> program declarations type statementSequence statement assignment ifStatement
+%type <NodePtr> elseClause whileStatement writeInt expression simpleExpression term factor
 
-declarations : VAR IDENT AS type SC declarations { $$ = new_declaration_t(0, $2, $4, $5); }
-| {g_hash_table_insert(IDENT, IDENT); $$ = new_declaration_t(1, NULL, NULL, NULL);}
+%%
+program : PROGRAM declarations BGN statementSequence END { prgrm = new_program_t(1, $2, $4); }
+
+declarations : VAR IDENT AS type SC declarations
+{   s = (struct idHashable *)malloc(sizeof *s);
+    s->identify = $2;
+    s->init = 0;
+    HASH_ADD_KEYPTR( hh, idents, s->identify, strlen(s->identify), s);
+    $$ = new_declaration_t(0, $2, $4, $6); }
+| {$$ = NULL;}
 ;
 
-type : INT  { $$ = new_type_t(0, $1); }
-| BOOL { $$ = new_type_t(1, $1); }
+type : INT  { $$ = new_type_t(0); }
+| BOOL { $$ = new_type_t(1); }
 
 statementSequence : statement SC statementSequence { $$ = new_statement_sequence_t(0, $1, $3); }
-| {$$ = new_statement_sequence_t(1, NULL, NULL);}
+| {$$ = NULL;}
 ;
 
 statement : assignment { struct statement_t *statement = new_statement_t(0, $1, NULL, NULL, NULL); $$ = statement; }
@@ -63,13 +78,13 @@ statement : assignment { struct statement_t *statement = new_statement_t(0, $1, 
 | writeInt { struct statement_t *statement = new_statement_t(3, NULL, NULL, NULL, $1); $$ = statement; }
 
 assignment : IDENT ASGN expression { struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
-| IDENT ASGN READINT { struct assignment_t *assignment = new_assignment_t(1, $1, $3); $$ = assignment; }
+| IDENT ASGN READINT { struct assignment_t *assignment = new_assignment_t(1, $1, NULL); $$ = assignment; }
 
 
 ifStatement : IF expression THEN statementSequence elseClause END { struct if_statement_t *if_statement_t = new_if_statement_t(6, $2, $4, $5); $$ = if_statement_t; }
 
 elseClause : ELSE statementSequence { struct else_clause_t *else_clause = new_else_clause_t(0, $2); $$ = else_clause; }
-| {struct else_clause_t *else_clause = new_else_clause_t(1, NULL); $$ = else_clause;}
+| {$$ = NULL;}
 ;
 
 whileStatement : WHILE expression DO statementSequence END { struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
@@ -86,10 +101,10 @@ simpleExpression : term OP3 term { struct simple_expression_t *simple_expression
 term : factor OP2 factor { struct term_t *term = new_term_t(12, $1, $3); $$ = term; }
 | factor { struct term_t *term = new_term_t(12, $1, NULL); $$ = term; }
 
-factor : IDENT { struct factor_t *factor = new_factor_t(13, $1, NULL, NULL, NULL); $$ = factor; }
-| NUM { struct factor_t *factor = new_factor_t(13, NULL, $1, NULL, NULL); $$ = factor; }
-| BOOLLIT { struct factor_t *factor = new_factor_t(13, NULL, NULL, $1, NULL); $$ = factor; }
-| LP expression RP { struct factor_t *factor = new_factor_t(13, NULL, NULL, NULL, $1); $$ = factor; }
+factor : IDENT { struct factor_t *factor = new_factor_t(13, $1, 0, 0, NULL); $$ = factor; }
+| NUM { struct factor_t *factor = new_factor_t(13, NULL, $1, 0, NULL); $$ = factor; }
+| BOOLLIT { struct factor_t *factor = new_factor_t(13, NULL, 0, $1, NULL); $$ = factor; }
+| LP expression RP { struct factor_t *factor = new_factor_t(13, NULL, 0, 0, $2); $$ = factor; }
 
 %%
 int main(void)

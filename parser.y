@@ -7,7 +7,6 @@
     #include "bisonnodes.h"
     #include <glib.h>
     GHashTable * syb = g_hash_table_new();
-    char * id;
     
 %}
 
@@ -40,15 +39,15 @@
     (void) *nPtr; /* node pointer */
 };
 
-%token BOOLLIT
-%token NUM
-%token IDENT
+%token <boolType> BOOLLIT
+%token <iValue> NUM
+%token <sIndex> IDENT
 
 %%
 program : PROGRAM declarations BGN statementSequence END { $$ = new_program_t(1, $2, $4); }
 
 declarations : VAR IDENT AS type SC declarations { $$ = new_declaration_t(0, $2, $4, $5); }
-| {$$ = new_declaration_t(1, NULL, NULL, NULL);}
+| {g_hash_table_insert(IDENT, IDENT); $$ = new_declaration_t(1, NULL, NULL, NULL);}
 ;
 
 type : INT  { $$ = new_type_t(0, $1); }

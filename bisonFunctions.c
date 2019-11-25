@@ -19,7 +19,10 @@ void printProgram(struct program_t *p)
 }
 void printDeclarations(struct declaration_t *d)
 {
-    printf("%s %s;\n", d->type, d->ident);
+    //printf("begin printDeclarations\n %s\n", d->ident);
+    //printf("d->type, d->ident: %s, %s\n", d->type, d->ident);
+    //printf("should have printed info for printDeclarations\n");
+    printf("%s %s;\n", "int", d->ident);
     if(d->inner)
     {
         printDeclarations(d->inner);
@@ -59,7 +62,7 @@ void printStatement(struct statement_t *s)
 }
 void printWriteInt(struct write_int_t *wi)
 {
-    printf("printf(\"\%d\", (");
+    printf("printf(\"\%%d\", (");
     printExpression(wi->expression);
     printf("));\n");
 }
@@ -106,12 +109,61 @@ void printAssignement(struct assignment_t *a)
     }
     else if(a->nodetype == 1)
     {
-        printf("scanf(\"\%d\",&%s);\n", a->ident);
+        printf("scanf(\"%%d\",&%s);\n", a->ident);
     }
 }
 void printExpression(struct expression_t *e)
 {
-    printf("Expression goes here");
+    //printf("Expression goes here");
+    if (e->simple_expression)
+        printSimpleExpression(e->simple_expression);
+    if (e->simple_expression_2)
+        printSimpleExpression(e->simple_expression_2);
+
+}
+void printSimpleExpression(struct simple_expression_t *simple)
+{
+    // CURRENTLY HARD CODED FOR MULTIPLICATION
+    // TODO support addition
+    //printf("simple->term: %s.\n", simple->term);
+    //printf("%s * %s", simple->term, simple->term_2);
+    if (simple->term)
+        printTerm(simple->term);
+    if (simple->term_2)
+        printTerm(simple->term_2);
+}
+void printTerm(struct term_t *term)
+{
+    if (term->factor)
+    {
+        printFactor(term->factor);
+    }
+    if (term->factor_2)
+    {
+        printf("*");
+        printFactor(term->factor_2);
+    }
+}
+void printFactor(struct factor_t *factor)
+{
+    if (factor->ident)
+    {
+        printf("%s", factor->ident);
+    }
+    else if (factor->num)
+    {
+        printf("%d", factor->num);
+    }
+    else if (factor->boollit)
+    {
+        printf("%d", factor->boollit);
+    }
+    else if (factor->expression)
+    {
+        printf("(");
+	printExpression(factor->expression);
+	printf(")");
+    }
 }
 
 

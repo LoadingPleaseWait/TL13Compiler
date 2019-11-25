@@ -20,6 +20,9 @@ void printIfStatement(struct if_statement_t *);
 void printElse(struct else_clause_t *);
 void printAssignement(struct assignment_t *);
 void printExpression(struct expression_t *);
+void printSimpleExpression(struct simple_expression_t *);
+void printTerm(struct term_t *);
+void printFactor(struct factor_t *);
 
 
 #endif /* bisonprint_h */

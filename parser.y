@@ -54,14 +54,25 @@ void* NodePtr;
 %type <NodePtr> elseClause whileStatement writeInt expression simpleExpression term factor
 
 %%
-program : PROGRAM declarations BGN statementSequence END { prgrm = new_program_t(1, $2, $4); }
+program : PROGRAM declarations BGN statementSequence END { prgrm = new_program_t(1, $2, $4); printProgram(prgrm); }
 
 declarations : VAR IDENT AS type SC declarations
 {   s = (struct idHashable *)malloc(sizeof *s);
     s->identify = $2;
+    //printf("$1, $2, $3, $4, $5, $6: %s, %s, %s, %s, %s, %s\n", 0, $2, 0, $4, 0, $6);
+    //printf("$2, $4, s->identify: %s, %s, %s\n", $2, $4, yylval.sIndex);
+    //printf("sIndex: %s\n", yylval.sIndex);
     s->init = 0;
     HASH_ADD_KEYPTR( hh, idents, s->identify, strlen(s->identify), s);
-    $$ = new_declaration_t(0, $2, $4, $6); }
+    char *identifier;
+    char delimiter[] = " ";
+    char *context;
+    int length = strlen($2);
+    char *copy = (char*) calloc(length + 1, sizeof(char));
+    strncpy(copy, $2, length);
+    identifier = strtok_r (copy, delimiter, &context);
+    //printf("identifier: %s\n", identifier);
+    $$ = new_declaration_t(0, identifier, $4, $6); }
 | {$$ = NULL;}
 ;
 
@@ -77,8 +88,16 @@ statement : assignment { struct statement_t *statement = new_statement_t(0, $1, 
 | whileStatement { struct statement_t *statement = new_statement_t(2, NULL, NULL, $1, NULL); $$ = statement; }
 | writeInt { struct statement_t *statement = new_statement_t(3, NULL, NULL, NULL, $1); $$ = statement; }
 
-assignment : IDENT ASGN expression { struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
-| IDENT ASGN READINT { struct assignment_t *assignment = new_assignment_t(1, $1, NULL); $$ = assignment; }
+assignment : IDENT ASGN expression { /*printf("(asgn)$1: %s\n", $1);*/ struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
+| IDENT ASGN READINT { /*printf("$1: %s\n", $1);*/ char *identifier;
+    char delimiter[] = " ";
+    char *context;
+    int length = strlen($1);
+    char *copy = (char*) calloc(length + 1, sizeof(char));
+    strncpy(copy, $1, length);
+    identifier = strtok_r (copy, delimiter, &context);
+    //printf("identifier: %s\n", identifier);
+    struct assignment_t *assignment = new_assignment_t(1, identifier, NULL); $$ = assignment; }
 
 
 ifStatement : IF expression THEN statementSequence elseClause END { struct if_statement_t *if_statement_t = new_if_statement_t(6, $2, $4, $5); $$ = if_statement_t; }
@@ -101,7 +120,14 @@ simpleExpression : term OP3 term { struct simple_expression_t *simple_expression
 term : factor OP2 factor { struct term_t *term = new_term_t(12, $1, $3); $$ = term; }
 | factor { struct term_t *term = new_term_t(12, $1, NULL); $$ = term; }
 
-factor : IDENT { struct factor_t *factor = new_factor_t(13, $1, 0, 0, NULL); $$ = factor; }
+factor : IDENT { char *identifier;
+    char delimiter[] = " ";
+    char *context;
+    int length = strlen($1);
+    char *copy = (char*) calloc(length + 1, sizeof(char));
+    strncpy(copy, $1, length);
+    identifier = strtok_r (copy, delimiter, &context);
+    struct factor_t *factor = new_factor_t(13, identifier, 0, 0, NULL); $$ = factor; }
 | NUM { struct factor_t *factor = new_factor_t(13, NULL, $1, 0, NULL); $$ = factor; }
 | BOOLLIT { struct factor_t *factor = new_factor_t(13, NULL, 0, $1, NULL); $$ = factor; }
 | LP expression RP { struct factor_t *factor = new_factor_t(13, NULL, 0, 0, $2); $$ = factor; }

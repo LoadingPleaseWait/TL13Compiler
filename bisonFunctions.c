@@ -6,7 +6,7 @@
 //  Copyright © 2019 Samuel Button. All rights reserved.
 //
 #include <stdio.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #include "bisonprint.h"
 #include "bisonnodes.h"
 
@@ -102,7 +102,8 @@ void printAssignement(struct assignment_t *a)
 {
     if(a->nodetype == 0)
     {
-        printf("%s = ", a->ident);
+        //printf("BEGIN IDENT:%sENDIDENT", a->ident);
+        printf("%s = ", isolate_identifier(a->ident));
         printExpression(a->expression);
         printf(";\n");
         
@@ -123,14 +124,19 @@ void printExpression(struct expression_t *e)
 }
 void printSimpleExpression(struct simple_expression_t *simple)
 {
-    // CURRENTLY HARD CODED FOR MULTIPLICATION
-    // TODO support addition
+    // CURRENTLY HARD CODED FOR MULTIPLICATION AND SUBTRACTION
+    // TODO support other operations
     //printf("simple->term: %s.\n", simple->term);
     //printf("%s * %s", simple->term, simple->term_2);
     if (simple->term)
+    {
         printTerm(simple->term);
+    }
     if (simple->term_2)
+    {
+        printf("-");
         printTerm(simple->term_2);
+    }
 }
 void printTerm(struct term_t *term)
 {
@@ -150,20 +156,37 @@ void printFactor(struct factor_t *factor)
     {
         printf("%s", factor->ident);
     }
-    else if (factor->num)
+    else if (factor->expression)
     {
-        printf("%d", factor->num);
+        printf("(");
+        printExpression(factor->expression);
+        printf(")");
     }
     else if (factor->boollit)
     {
         printf("%d", factor->boollit);
     }
-    else if (factor->expression)
+    else //if (factor->num)
     {
-        printf("(");
-	printExpression(factor->expression);
-	printf(")");
+        printf("%d", factor->num);
     }
+
+}
+
+
+/// Utility function to get the first word of a string
+char *isolate_identifier(char *input)
+{
+    char delimiter[] = " ";
+    int length = strlen(input);
+    char *strtokReturn = (char*) calloc(length + 1, sizeof(char));
+    char *output = (char*) calloc(length + 1, sizeof(char));
+    strncpy(output, input, length);
+    strtokReturn = strtok(output, delimiter);
+    // TODO figure out why strtokReturn gives a bad memory address
+    //printf("identifier: %s\n", output);
+
+    return output;
 }
 
 

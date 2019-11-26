@@ -64,13 +64,7 @@ declarations : VAR IDENT AS type SC declarations
     //printf("sIndex: %s\n", yylval.sIndex);
     s->init = 0;
     HASH_ADD_KEYPTR( hh, idents, s->identify, strlen(s->identify), s);
-    char *identifier;
-    char delimiter[] = " ";
-    char *context;
-    int length = strlen($2);
-    char *copy = (char*) calloc(length + 1, sizeof(char));
-    strncpy(copy, $2, length);
-    identifier = strtok_r (copy, delimiter, &context);
+    char *identifier = isolate_identifier($2);
     //printf("identifier: %s\n", identifier);
     $$ = new_declaration_t(0, identifier, $4, $6); }
 | {$$ = NULL;}
@@ -89,13 +83,8 @@ statement : assignment { struct statement_t *statement = new_statement_t(0, $1, 
 | writeInt { struct statement_t *statement = new_statement_t(3, NULL, NULL, NULL, $1); $$ = statement; }
 
 assignment : IDENT ASGN expression { /*printf("(asgn)$1: %s\n", $1);*/ struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
-| IDENT ASGN READINT { /*printf("$1: %s\n", $1);*/ char *identifier;
-    char delimiter[] = " ";
-    char *context;
-    int length = strlen($1);
-    char *copy = (char*) calloc(length + 1, sizeof(char));
-    strncpy(copy, $1, length);
-    identifier = strtok_r (copy, delimiter, &context);
+| IDENT ASGN READINT { 
+    char *identifier = isolate_identifier($1);
     //printf("identifier: %s\n", identifier);
     struct assignment_t *assignment = new_assignment_t(1, identifier, NULL); $$ = assignment; }
 
@@ -120,13 +109,8 @@ simpleExpression : term OP3 term { struct simple_expression_t *simple_expression
 term : factor OP2 factor { struct term_t *term = new_term_t(12, $1, $3); $$ = term; }
 | factor { struct term_t *term = new_term_t(12, $1, NULL); $$ = term; }
 
-factor : IDENT { char *identifier;
-    char delimiter[] = " ";
-    char *context;
-    int length = strlen($1);
-    char *copy = (char*) calloc(length + 1, sizeof(char));
-    strncpy(copy, $1, length);
-    identifier = strtok_r (copy, delimiter, &context);
+factor : IDENT {
+    char *identifier = isolate_identifier($1);
     struct factor_t *factor = new_factor_t(13, identifier, 0, 0, NULL); $$ = factor; }
 | NUM { struct factor_t *factor = new_factor_t(13, NULL, $1, 0, NULL); $$ = factor; }
 | BOOLLIT { struct factor_t *factor = new_factor_t(13, NULL, 0, $1, NULL); $$ = factor; }

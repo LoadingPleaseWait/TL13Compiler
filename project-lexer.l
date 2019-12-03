@@ -33,9 +33,10 @@
 "writeInt"	return WRITEINT;
 "readInt"	return READINT;
 
-[1-9][0-9]*|0	{yylval = yytext; return NUM;}
-"false"|"true"	{yylval = yytext; return BOOLLIT;}
-[A-Za-z][0-9A-Za-z]*	{yylval = yytext; return IDENT;}
+[1-9][0-9]*|0	{yylval.iValue = atoi(yytext); return NUM;}
+"false" {yylval.boolType = 0; return BOOLLIT;}
+"true"	{yylval.boolType = 1; return BOOLLIT;}
+[A-Za-z][0-9A-Za-z]*	{yylval.sIndex = yytext; return IDENT;}
 %%
 /*
 int main()

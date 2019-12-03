@@ -23,12 +23,14 @@ struct factor_t {
 struct term_t {
     int nodetype;
     struct factor_t *factor;
+    char* op;
     struct factor_t *factor_2;
 };
 
 struct simple_expression_t {
     int nodetype;
     struct term_t *term;
+    char* op;
     struct term_t *term_2;
 };
 
@@ -40,6 +42,7 @@ struct else_clause_t {
 struct expression_t {
     int nodetype;
     struct simple_expression_t *simple_expression;
+    char* op;
     struct simple_expression_t *simple_expression_2;
 };
 
@@ -109,9 +112,9 @@ struct if_statement_t *new_if_statement_t(int nodetype, struct expression_t *exp
 struct else_clause_t *new_else_clause_t(int nodetype, struct statement_sequence_t *statement_sequence);
 struct while_statement_t *new_while_statement_t(int nodetype, struct expression_t *expression, struct statement_sequence_t *statement_sequence);
 struct write_int_t *new_write_int_t(int nodetype, struct expression_t *expression);
-struct expression_t *new_expression_t(int nodetype, struct simple_expression_t *simple_expression, struct simple_expression_t *simple_expression_2);
-struct simple_expression_t *new_simple_expression_t(int nodetype, struct term_t *term, struct term_t *term_2);
-struct term_t *new_term_t(int nodetype, struct factor_t *factor, struct factor_t *factor_2);
+struct expression_t *new_expression_t(int nodetype, struct simple_expression_t *simple_expression, char* opcode, struct simple_expression_t *simple_expression_2);
+struct simple_expression_t *new_simple_expression_t(int nodetype, struct term_t *term, char* opcode, struct term_t *term_2);
+struct term_t *new_term_t(int nodetype, struct factor_t *factor, char* opcode, struct factor_t *factor_2);
 struct factor_t *new_factor_t(int nodetype, char *ident, int num, int boollit, struct expression_t *expression);
 
 

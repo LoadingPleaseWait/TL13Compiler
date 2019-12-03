@@ -99,22 +99,22 @@ whileStatement : WHILE expression DO statementSequence END { struct while_statem
 
 writeInt : WRITEINT expression { struct write_int_t *write_int = new_write_int_t(9, $2); $$ = write_int; }
 
-expression : simpleExpression { struct expression_t *expression = new_expression_t(10, $1, NULL); $$ = expression; }
-| simpleExpression OP4 simpleExpression { struct expression_t *expression = new_expression_t(10, $1, $3); $$ = expression; }
+expression : simpleExpression { struct expression_t *expression = new_expression_t(0, $1, NULL, NULL); $$ = expression; }
+| simpleExpression OP4 simpleExpression { struct expression_t *expression = new_expression_t(1, $1, $2, $3); $$ = expression; }
 
-simpleExpression : term OP3 term { struct simple_expression_t *simple_expression = new_simple_expression_t(11, $1, $3); $$ = simple_expression; }
-| term { struct simple_expression_t *simple_expression = new_simple_expression_t(11, $1, NULL); $$ = simple_expression; }
+simpleExpression : term OP3 term { struct simple_expression_t *simple_expression = new_simple_expression_t(1, $1, $2, $3); $$ = simple_expression; }
+| term { struct simple_expression_t *simple_expression = new_simple_expression_t(0, $1, NULL, NULL); $$ = simple_expression; }
 
 
-term : factor OP2 factor { struct term_t *term = new_term_t(12, $1, $3); $$ = term; }
-| factor { struct term_t *term = new_term_t(12, $1, NULL); $$ = term; }
+term : factor OP2 factor { struct term_t *term = new_term_t(1, $1, $2, $3); $$ = term; }
+| factor { struct term_t *term = new_term_t(0, $1, NULL, NULL); $$ = term; }
 
 factor : IDENT {
     char *identifier = isolate_identifier($1);
-    struct factor_t *factor = new_factor_t(13, identifier, 0, 0, NULL); $$ = factor; }
-| NUM { struct factor_t *factor = new_factor_t(13, NULL, $1, 0, NULL); $$ = factor; }
-| BOOLLIT { struct factor_t *factor = new_factor_t(13, NULL, 0, $1, NULL); $$ = factor; }
-| LP expression RP { struct factor_t *factor = new_factor_t(13, NULL, 0, 0, $2); $$ = factor; }
+    struct factor_t *factor = new_factor_t(0, identifier, 0, 0, NULL); $$ = factor; }
+| NUM { struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor; }
+| BOOLLIT { struct factor_t *factor = new_factor_t(2, NULL, 0, $1, NULL); $$ = factor; }
+| LP expression RP { struct factor_t *factor = new_factor_t(3, NULL, 0, 0, $2); $$ = factor; }
 
 %%
 int main(void)

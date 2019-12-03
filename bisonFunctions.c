@@ -118,8 +118,11 @@ void printExpression(struct expression_t *e)
     //printf("Expression goes here");
     if (e->simple_expression)
         printSimpleExpression(e->simple_expression);
-    if (e->simple_expression_2)
+    if (e->nodetype)
+    {
+        printf(" %s ", e->op);
         printSimpleExpression(e->simple_expression_2);
+    }
 
 }
 void printSimpleExpression(struct simple_expression_t *simple)
@@ -132,9 +135,9 @@ void printSimpleExpression(struct simple_expression_t *simple)
     {
         printTerm(simple->term);
     }
-    if (simple->term_2)
+    if (simple->nodetype)
     {
-        printf("-");
+        printf(" %s ", simple->op);
         printTerm(simple->term_2);
     }
 }
@@ -144,29 +147,30 @@ void printTerm(struct term_t *term)
     {
         printFactor(term->factor);
     }
-    if (term->factor_2)
+    if (term->nodetype)
     {
-        printf("*");
+        printf(" %s ", term->op);
         printFactor(term->factor_2);
     }
 }
 void printFactor(struct factor_t *factor)
 {
-    if (factor->ident)
+    int swinch = factor->nodetype;
+    if (swinch==0)
     {
         printf("%s", factor->ident);
     }
-    else if (factor->expression)
+    else if (swinch ==1)
     {
         printf("(");
         printExpression(factor->expression);
         printf(")");
     }
-    else if (factor->boollit)
+    else if (swinch ==2)
     {
         printf("%d", factor->boollit);
     }
-    else //if (factor->num)
+    else if (swinch ==3)
     {
         printf("%d", factor->num);
     }
@@ -331,7 +335,7 @@ struct write_int_t *new_write_int_t(int nodetype, struct expression_t *expressio
     return return_val;
 }
 
-struct expression_t *new_expression_t(int nodetype, struct simple_expression_t *simple_expression, struct simple_expression_t *simple_expression_2) {
+struct expression_t *new_expression_t(int nodetype, struct simple_expression_t *simple_expression, char* opcode, struct simple_expression_t *simple_expression_2) {
     struct expression_t *return_val = malloc(sizeof(struct expression_t));
     
     if(!return_val) {
@@ -340,11 +344,15 @@ struct expression_t *new_expression_t(int nodetype, struct simple_expression_t *
     }
     return_val->nodetype = nodetype;
     return_val->simple_expression = simple_expression;
-    return_val->simple_expression_2 = simple_expression_2;
+    if(nodetype)
+    {
+        return_val->op = opcode;
+        return_val->simple_expression_2 = simple_expression_2;
+    }
     return return_val;
 }
 
-struct simple_expression_t *new_simple_expression_t(int nodetype, struct term_t *term, struct term_t *term_2) {
+struct simple_expression_t *new_simple_expression_t(int nodetype, struct term_t *term, char* opcode, struct term_t *term_2) {
     struct simple_expression_t *return_val = malloc(sizeof(struct simple_expression_t));
     
     if(!return_val) {
@@ -353,11 +361,15 @@ struct simple_expression_t *new_simple_expression_t(int nodetype, struct term_t 
     }
     return_val->nodetype = nodetype;
     return_val->term = term;
-    return_val->term_2 = term_2;
+    if(nodetype)
+    {
+        return_val->term_2 = term_2;
+        return_val->op = opcode;
+    }
     return return_val;
 }
 
-struct term_t *new_term_t(int nodetype, struct factor_t *factor, struct factor_t *factor_2){
+struct term_t *new_term_t(int nodetype, struct factor_t *factor, char* opcode, struct factor_t *factor_2){
     struct term_t *return_val = malloc(sizeof(struct term_t));
     
     if(!return_val) {
@@ -366,7 +378,11 @@ struct term_t *new_term_t(int nodetype, struct factor_t *factor, struct factor_t
     }
     return_val->nodetype = nodetype;
     return_val->factor = factor;
-    return_val->factor_2 = factor_2;
+    if (nodetype)
+    {
+        return_val->factor_2 = factor_2;
+        return_val->op = opcode;
+    }
     return return_val;
 }
 

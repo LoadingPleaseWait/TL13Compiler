@@ -1,6 +1,6 @@
 %{
 #include<stdio.h>
-
+#include <string.h>
 #include"parser.tab.h"
 %}
 
@@ -13,9 +13,9 @@
 ")"	return RP;
 ":="	return ASGN;
 ";"	return SC;
-"*"|"div"|"mod"	return OP2;
-"+"|"-"	return OP3;
-"="|"!="|"<"|">"|"<="|">="	return OP4;
+"*"|"div"|"mod"	{yylval.sIndex = strdup(yytext); return OP2;}
+"+"|"-"	{yylval.sIndex = strdup(yytext); return OP3;}
+"="|"!="|"<"|">"|"<="|">="	{yylval.sIndex = strdup(yytext); return OP4};
 
 "if"	return IF;
 "then"	return THEN;
@@ -36,7 +36,7 @@
 [1-9][0-9]*|0	{yylval.iValue = atoi(yytext); return NUM;}
 "false" {yylval.boolType = 0; return BOOLLIT;}
 "true"	{yylval.boolType = 1; return BOOLLIT;}
-[A-Za-z][0-9A-Za-z]*	{yylval.sIndex = yytext; return IDENT;}
+[A-Za-z][0-9A-Za-z]*	{yylval.sIndex = strdup(yytext); return IDENT;}
 %%
 /*
 int main()

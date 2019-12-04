@@ -63,7 +63,7 @@ void printStatement(struct statement_t *s)
 void printWriteInt(struct write_int_t *wi)
 {
     
-    printf("printf(\"%%d\", (");
+    printf("printf(\"%%d\\n\", (");
     printExpression(wi->expression);
     printf("));\n");
     
@@ -157,7 +157,24 @@ void printTerm(struct term_t *term)
     }
     if (term->nodetype)
     {
-        printf(" %s ", term->op);
+        if (strcmp("*", term->op) == 0)
+	{
+	    // just an asterisk for multiplication
+	    printf(" %s ", term->op);
+	}
+	else
+	{
+	    // we need to convert the words "div" and "mod" to / and %
+	    if (strcmp("div", term->op) == 0)
+	    {
+	        printf(" / ");
+	    }
+	    else
+	    {
+	        printf(" %% ");
+            }
+	}
+			
         printFactor(term->factor_2);
     }
     

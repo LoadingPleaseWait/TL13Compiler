@@ -5,14 +5,10 @@
 #include"parser.tab.h"
 %}
 
-EOL     [\n]
-
 %%
 
 %.* {}
-[\t ]+ {}
-
-{EOL}   {yylineno++;}
+[\t\n ]+ {}
 
 "("	return LP;
 ")"	return RP;

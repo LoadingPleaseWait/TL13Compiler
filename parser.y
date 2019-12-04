@@ -105,12 +105,36 @@ simpleExpression : term OP3 term { struct simple_expression_t *simple_expression
 | term { struct simple_expression_t *simple_expression = new_simple_expression_t(0, $1, NULL, NULL); $$ = simple_expression; }
 
 
-term : factor OP2 factor { struct term_t *term = new_term_t(1, $1, $2, $3); $$ = term; }
+term : factor OP2 factor
+{   struct factor_t *factor_2 = $3;
+    //printf("OP2: %s; factor: %d", $2, factor_2->num);
+    if ((strcmp("div", $2) == 0 || strcmp("mod", $2) == 0) && factor_2->num == 0)
+    {
+        // Modulus 0 and Divide by 0 are not allowed in TL13
+        yyerror("Division by 0");
+	//$$ = NULL;
+	exit(-1);
+    }
+    else
+    {
+        struct term_t *term = new_term_t(1, $1, $2, $3); $$ = term;
+    }
+}
 | factor { struct term_t *term = new_term_t(0, $1, NULL, NULL); $$ = term; }
 
 factor : IDENT {
     struct factor_t *factor = new_factor_t(0, $1, 0, 0, NULL); $$ = factor; }
-| NUM { struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor; }
+| NUM
+{   if ($1 > 2147483647 || $1 < -2147483647) {
+        yyerror("Integer is too large. Integer literals can be 0 through 2147483647.");
+	//$$ = NULL;
+	exit(-1);
+    }
+    else
+    {
+        struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor;
+    }
+}
 | BOOLLIT { struct factor_t *factor = new_factor_t(2, NULL, 0, $1, NULL); $$ = factor; }
 | LP expression RP { struct factor_t *factor = new_factor_t(3, NULL, 0, 0, $2); $$ = factor; }
 

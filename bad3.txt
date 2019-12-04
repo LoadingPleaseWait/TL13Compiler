@@ -1,0 +1,7 @@
+program
+	var X as int ;
+begin
+	X := readInt ;
+	X := 5 div 0 ;
+	writeInt X ;
+end

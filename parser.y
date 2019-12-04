@@ -156,24 +156,20 @@ simpleExpression : term OP3 term { struct simple_expression_t *simple_expression
 
 
 term : factor OP2 factor
-{ struct term_t *term = new_term_t(1, $1, $2, $3);
-    
-    //NOT ALL FACTORS ARE IDENTS, SOME ARE LITTERALS
-    /*
-    struct idHashable *f;
-    struct idHashable *f2;
-    if()
-    HASH_FIND_STR(idents, term->factor->ident, f);
-    HASH_FIND_STR(idents, term->factor_2->ident, f2);
-    if(f&&f2)
+{   struct factor_t *factor_2 = $3;
+    //printf("OP2: %s; factor: %d", $2, factor_2->num);
+    if ((strcmp("div", $2) == 0 || strcmp("mod", $2) == 0) && factor_2->num == 0)
     {
-     if(f->)
-     {
-        yyerror("BAD TYPE");
-     }
+        // Modulus 0 and Divide by 0 are not allowed in TL13
+        yyerror("Division by 0");
+	//$$ = NULL;
+	exit(-1);
     }
-    */
-    $$ = term; }
+    else
+    {
+        struct term_t *term = new_term_t(1, $1, $2, $3); $$ = term;
+    }
+}
 | factor { struct term_t *term = new_term_t(0, $1, NULL, NULL); $$ = term; }
 
 factor : IDENT
@@ -195,7 +191,17 @@ factor : IDENT
     $$ = factor;
     
 }
-| NUM { struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor; }
+| NUM
+{   if ($1 > 2147483647 || $1 < -2147483647) {
+        yyerror("Integer is too large. Integer literals can be 0 through 2147483647.");
+	//$$ = NULL;
+	exit(-1);
+    }
+    else
+    {
+        struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor;
+    }
+}
 | BOOLLIT { struct factor_t *factor = new_factor_t(2, NULL, 0, $1, NULL); $$ = factor; }
 | LP expression RP { struct factor_t *factor = new_factor_t(3, NULL, 0, 0, $2); $$ = factor; }
 

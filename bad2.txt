@@ -1,0 +1,12 @@
+program
+	var CONDITION as bool ;
+	var NUMBER as int ;
+begin
+	NUMBER := readInt ;
+	CONDITION := true ;
+	if CONDITION
+	then
+		NUMBER := 2147483648 ;
+	end;
+	writeInt NUMBER ;
+end

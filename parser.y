@@ -8,13 +8,13 @@
     #include "uthash.h"
     struct idHashable {
         char * identify;
+        char * type;
         int init;
         UT_hash_handle hh;
     };
     struct idHashable * idents, *s = NULL;
     struct program_t * prgrm;
     
-    extern int yylineno;
 %}
 
 %union {
@@ -58,22 +58,40 @@ void* NodePtr;
 program : PROGRAM declarations BGN statementSequence END { prgrm = new_program_t(1, $2, $4); printProgram(prgrm); }
 
 declarations : VAR IDENT AS type SC declarations
-{   s = (struct idHashable *)malloc(sizeof *s);
-    s->identify = $2;
+{   struct declaration_t * declaration = new_declaration_t(0, $2, $4, $6);
+    s = (struct idHashable *)malloc(sizeof *s);
+    s->identify = declaration->ident;
+    s->type = declaration->type;
     //printf("$1, $2, $3, $4, $5, $6: %s, %s, %s, %s, %s, %s\n", 0, $2, 0, $4, 0, $6);
     //printf("$2, $4, s->identify: %s, %s, %s\n", $2, $4, yylval.sIndex);
     //printf("sIndex: %s\n", yylval.sIndex);
+    if(s->type[0] == 'I')
+    {
     s->init = 0;
+    }
+    else
+    {
+        s->init = 1;
+    }
+    struct idHashable *f;
+    
+    HASH_FIND_STR(idents, s->identify, f);
+    if(f)
+    {
+        yyerror("you already have that one in there!");
+    }
+    
     HASH_ADD_KEYPTR( hh, idents, s->identify, strlen(s->identify), s);
+    
     //printf("identifier: %s\n", identifier);
-    $$ = new_declaration_t(0, $2, $4, $6); }
+    $$ = declaration; }
 | {$$ = NULL;}
 ;
 
 type : INT  { $$ = new_type_t(0); }
 | BOOL { $$ = new_type_t(1); }
 
-statementSequence : statement SC statementSequence {/*printf("statement sequence seen");*/ $$ = new_statement_sequence_t(0, $1, $3); }
+statementSequence : statement SC statementSequence {$$ = new_statement_sequence_t(0, $1, $3); }
 | {$$ = NULL;}
 ;
 
@@ -82,10 +100,42 @@ statement : assignment { struct statement_t *statement = new_statement_t(0, $1, 
 | whileStatement { struct statement_t *statement = new_statement_t(2, NULL, NULL, $1, NULL); $$ = statement; }
 | writeInt { struct statement_t *statement = new_statement_t(3, NULL, NULL, NULL, $1); $$ = statement; }
 
-assignment : IDENT ASGN expression { /*printf("(asgn)$1: %s\n", $1);*/ struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
-| IDENT ASGN READINT { 
+assignment : IDENT ASGN expression
+{   struct assignment_t *assignment = new_assignment_t(0, $1, $3);
+    struct idHashable *f;
+    HASH_FIND_STR(idents, assignment->ident, f);
+    if(f)
+    {
+        f->init = 1;
+    }
+    else
+    {
+        yyerror("UNDECLARED VARIABLE");
+    }
+    /*printf("(asgn)$1: %s\n", $1);*/  $$ = assignment; }
+| IDENT ASGN READINT
+{
     //printf("identifier: %s\n", identifier);
-    struct assignment_t *assignment = new_assignment_t(1, $1, NULL); $$ = assignment; }
+    struct assignment_t *assignment = new_assignment_t(1, $1, NULL);
+    struct idHashable *f;
+    HASH_FIND_STR(idents, assignment->ident, f);
+    if(f)
+    {
+        if(f->type[0] == 'B')
+        {
+            yyerror("BAD TYPE");
+        }
+        else
+        {
+        f->init = 1;
+        }
+    }
+    
+    else
+    {
+        yyerror("UNDECLARED VARIABLE");
+    }
+/*printf("(asgn)$1: %s\n", $1);*/  $$ = assignment; }
 
 
 ifStatement : IF expression THEN statementSequence elseClause END { struct if_statement_t *if_statement_t = new_if_statement_t(6, $2, $4, $5); $$ = if_statement_t; }
@@ -94,7 +144,7 @@ elseClause : ELSE statementSequence { struct else_clause_t *else_clause = new_el
 | {$$ = NULL;}
 ;
 
-whileStatement : WHILE expression DO statementSequence END {/*printf("while statement seen");*/ struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
+whileStatement : WHILE expression DO statementSequence END {struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
 
 writeInt : WRITEINT expression { struct write_int_t *write_int = new_write_int_t(9, $2); $$ = write_int; }
 
@@ -122,8 +172,25 @@ term : factor OP2 factor
 }
 | factor { struct term_t *term = new_term_t(0, $1, NULL, NULL); $$ = term; }
 
-factor : IDENT {
-    struct factor_t *factor = new_factor_t(0, $1, 0, 0, NULL); $$ = factor; }
+factor : IDENT
+{
+    struct factor_t *factor = new_factor_t(0, $1, 0, 0, NULL);
+    struct idHashable *f;
+    HASH_FIND_STR(idents, factor->ident, f);
+    if(f)
+    {
+        if(f->init != 1)
+        {
+            yyerror("NOT INITIALIZED");
+        }
+    }
+    else
+    {
+        yyerror("NOT DECLARED");
+    }
+    $$ = factor;
+    
+}
 | NUM
 {   if ($1 > 2147483647 || $1 < -2147483647) {
         yyerror("Integer is too large. Integer literals can be 0 through 2147483647.");
@@ -148,6 +215,7 @@ int yywrap(void)
 {
     return 1;
 }
-void yyerror(char *errorString) {
-    fprintf(stderr, "Line %d: %s\n", yylineno, errorString);
+void yyerror(char *s)
+{
+    fprintf(stdout, "%s\n", s);
 }

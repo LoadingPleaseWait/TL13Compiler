@@ -22,11 +22,19 @@ void printDeclarations(struct declaration_t *d)
     //printf("begin printDeclarations\n %s\n", d->ident);
     //printf("d->type, d->ident: %s, %s\n", d->type, d->ident);
     //printf("should have printed info for printDeclarations\n");
-    printf("%s %s;\n", "int", d->ident);
+    if(d->type[0] == 'I')
+    {
+    printf("%s %s = 0;\n", "int", d->ident);
+    }
+    else
+    {
+        printf("int %s = 0;\n", d->ident);
+    }
     if(d->inner)
     {
         printDeclarations(d->inner);
     }
+    
 }
 void printStatementSequ(struct statement_sequence_t *ss)
 {
@@ -112,7 +120,7 @@ void printAssignement(struct assignment_t *a)
     }
     else if(a->nodetype == 1)
     {
-        printf("scanf(\"%%d\",&%s);\n", a->ident);
+        printf("scanf(\"%%d\", &%s);\n", a->ident);
     }
 }
 void printExpression(struct expression_t *e)

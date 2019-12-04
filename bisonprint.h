@@ -24,6 +24,6 @@ void printSimpleExpression(struct simple_expression_t *);
 void printTerm(struct term_t *);
 void printFactor(struct factor_t *);
 
-char *isolate_identifier(char *input);
+//char *isolate_identifier(char *input);
 
 #endif /* bisonprint_h */

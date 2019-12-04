@@ -32,9 +32,9 @@ void* NodePtr;
 %token RP
 %token ASGN
 %token SC
-%token OP2
-%token OP3
-%token OP4
+%token <sIndex> OP2
+%token <sIndex> OP3
+%token <sIndex> OP4
 %token IF
 %token THEN
 %token ELSE
@@ -64,16 +64,15 @@ declarations : VAR IDENT AS type SC declarations
     //printf("sIndex: %s\n", yylval.sIndex);
     s->init = 0;
     HASH_ADD_KEYPTR( hh, idents, s->identify, strlen(s->identify), s);
-    char *identifier = isolate_identifier($2);
     //printf("identifier: %s\n", identifier);
-    $$ = new_declaration_t(0, identifier, $4, $6); }
+    $$ = new_declaration_t(0, $2, $4, $6); }
 | {$$ = NULL;}
 ;
 
 type : INT  { $$ = new_type_t(0); }
 | BOOL { $$ = new_type_t(1); }
 
-statementSequence : statement SC statementSequence { $$ = new_statement_sequence_t(0, $1, $3); }
+statementSequence : statement SC statementSequence {printf("statement sequence seen"); $$ = new_statement_sequence_t(0, $1, $3); }
 | {$$ = NULL;}
 ;
 
@@ -84,9 +83,8 @@ statement : assignment { struct statement_t *statement = new_statement_t(0, $1, 
 
 assignment : IDENT ASGN expression { /*printf("(asgn)$1: %s\n", $1);*/ struct assignment_t *assignment = new_assignment_t(0, $1, $3); $$ = assignment; }
 | IDENT ASGN READINT { 
-    char *identifier = isolate_identifier($1);
     //printf("identifier: %s\n", identifier);
-    struct assignment_t *assignment = new_assignment_t(1, identifier, NULL); $$ = assignment; }
+    struct assignment_t *assignment = new_assignment_t(1, $1, NULL); $$ = assignment; }
 
 
 ifStatement : IF expression THEN statementSequence elseClause END { struct if_statement_t *if_statement_t = new_if_statement_t(6, $2, $4, $5); $$ = if_statement_t; }
@@ -95,7 +93,7 @@ elseClause : ELSE statementSequence { struct else_clause_t *else_clause = new_el
 | {$$ = NULL;}
 ;
 
-whileStatement : WHILE expression DO statementSequence END { struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
+whileStatement : WHILE expression DO statementSequence END {printf("while statement seen"); struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
 
 writeInt : WRITEINT expression { struct write_int_t *write_int = new_write_int_t(9, $2); $$ = write_int; }
 
@@ -110,8 +108,7 @@ term : factor OP2 factor { struct term_t *term = new_term_t(1, $1, $2, $3); $$ =
 | factor { struct term_t *term = new_term_t(0, $1, NULL, NULL); $$ = term; }
 
 factor : IDENT {
-    char *identifier = isolate_identifier($1);
-    struct factor_t *factor = new_factor_t(0, identifier, 0, 0, NULL); $$ = factor; }
+    struct factor_t *factor = new_factor_t(0, $1, 0, 0, NULL); $$ = factor; }
 | NUM { struct factor_t *factor = new_factor_t(1, NULL, $1, 0, NULL); $$ = factor; }
 | BOOLLIT { struct factor_t *factor = new_factor_t(2, NULL, 0, $1, NULL); $$ = factor; }
 | LP expression RP { struct factor_t *factor = new_factor_t(3, NULL, 0, 0, $2); $$ = factor; }

@@ -1,6 +1,13 @@
-adsf3243wadfse3243adfsasdf
 
-asdfwr2342asdferr23
 program
-a324wefsdfs
-
+var X as int ;
+var Y as int ;
+begin
+X := readInt ;
+Y := 14
+if
+X >= Y
+then
+writeInt 2 * X ;
+end
+end

@@ -1,0 +1,11 @@
+program
+var CONDITION as bool ;
+var NUMBER as int ;
+begin
+NUMBER := readInt ;
+CONDITION := true ;
+if CONDITION
+then
+NUMBER := 100 ;
+end;
+end

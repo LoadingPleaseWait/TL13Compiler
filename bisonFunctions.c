@@ -15,7 +15,7 @@ void printProgram(struct program_t *p)
     printf("#include <stdio.h>\n\nint main(int argc, const char * argv[]) {\n");
     printDeclarations(p->declarations);
     printStatementSequ(p->statements);
-    printf("return 0;\n}");
+    printf("return 0;\n}\n");
 }
 void printDeclarations(struct declaration_t *d)
 {
@@ -62,9 +62,11 @@ void printStatement(struct statement_t *s)
 }
 void printWriteInt(struct write_int_t *wi)
 {
-    printf("printf(\"\%%d\", (");
+    
+    printf("printf(\"%%d\", (");
     printExpression(wi->expression);
     printf("));\n");
+    
 }
 void printWhileStatement(struct while_statement_t *w)
 {
@@ -103,27 +105,31 @@ void printAssignement(struct assignment_t *a)
     if(a->nodetype == 0)
     {
         //printf("BEGIN IDENT:%sENDIDENT", a->ident);
-        printf("%s = ", isolate_identifier(a->ident));
+        printf("%s = ", a->ident);
         printExpression(a->expression);
         printf(";\n");
         
     }
     else if(a->nodetype == 1)
     {
-        printf("scanf(\"%%d\",&%s);\n", a->ident);
+        printf("scanf(\"%%d\", %s);\n", a->ident);
     }
 }
 void printExpression(struct expression_t *e)
 {
-    //printf("Expression goes here");
+    
     if (e->simple_expression)
+    {
         printSimpleExpression(e->simple_expression);
+    }
+    
     if (e->nodetype)
     {
         printf(" %s ", e->op);
         printSimpleExpression(e->simple_expression_2);
     }
-
+    
+    
 }
 void printSimpleExpression(struct simple_expression_t *simple)
 {
@@ -131,6 +137,7 @@ void printSimpleExpression(struct simple_expression_t *simple)
     // TODO support other operations
     //printf("simple->term: %s.\n", simple->term);
     //printf("%s * %s", simple->term, simple->term_2);
+    
     if (simple->term)
     {
         printTerm(simple->term);
@@ -143,6 +150,7 @@ void printSimpleExpression(struct simple_expression_t *simple)
 }
 void printTerm(struct term_t *term)
 {
+    
     if (term->factor)
     {
         printFactor(term->factor);
@@ -152,15 +160,17 @@ void printTerm(struct term_t *term)
         printf(" %s ", term->op);
         printFactor(term->factor_2);
     }
+    
 }
 void printFactor(struct factor_t *factor)
 {
+    
     int swinch = factor->nodetype;
     if (swinch==0)
     {
         printf("%s", factor->ident);
     }
-    else if (swinch ==1)
+    else if (swinch ==3)
     {
         printf("(");
         printExpression(factor->expression);
@@ -170,15 +180,16 @@ void printFactor(struct factor_t *factor)
     {
         printf("%d", factor->boollit);
     }
-    else if (swinch ==3)
+    else if (swinch ==1)
     {
         printf("%d", factor->num);
     }
-
+     
 }
 
 
 /// Utility function to get the first word of a string
+/*
 char *isolate_identifier(char *input)
 {
     char delimiter[] = " ";
@@ -193,7 +204,7 @@ char *isolate_identifier(char *input)
     return output;
 }
 
-
+*/
 
 struct program_t *new_program_t(int nodetype, struct declaration_t *l, struct statement_sequence_t *r)
 {

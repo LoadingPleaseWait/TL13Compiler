@@ -1,18 +1,13 @@
-%option yylineno
 %{
 #include<stdio.h>
 #include <string.h>
 #include"parser.tab.h"
 %}
 
-EOL     [\n]
-
 %%
 
 %.* {}
-[\t ]+ {}
-
-{EOL}   {yylineno++;}
+[\t\n ]+ {}
 
 "("	return LP;
 ")"	return RP;

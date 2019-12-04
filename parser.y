@@ -124,6 +124,6 @@ int yywrap(void)
 {
     return 1;
 }
-void yyerror(char *s) {
-    fprintf(stdout, "%s\n", s);
+void yyerror(char *errorString) {
+    fprintf(stderr, "Line %d: %s\n", yylineno, errorString);
 }

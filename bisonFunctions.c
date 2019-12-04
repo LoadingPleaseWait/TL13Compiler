@@ -112,7 +112,7 @@ void printAssignement(struct assignment_t *a)
     }
     else if(a->nodetype == 1)
     {
-        printf("scanf(\"%%d\", %s);\n", a->ident);
+        printf("scanf(\"%%d\",&%s);\n", a->ident);
     }
 }
 void printExpression(struct expression_t *e)

@@ -14,6 +14,7 @@
     struct idHashable * idents, *s = NULL;
     struct program_t * prgrm;
     
+    extern int yylineno;
 %}
 
 %union {
@@ -72,7 +73,7 @@ declarations : VAR IDENT AS type SC declarations
 type : INT  { $$ = new_type_t(0); }
 | BOOL { $$ = new_type_t(1); }
 
-statementSequence : statement SC statementSequence {printf("statement sequence seen"); $$ = new_statement_sequence_t(0, $1, $3); }
+statementSequence : statement SC statementSequence {/*printf("statement sequence seen");*/ $$ = new_statement_sequence_t(0, $1, $3); }
 | {$$ = NULL;}
 ;
 
@@ -93,7 +94,7 @@ elseClause : ELSE statementSequence { struct else_clause_t *else_clause = new_el
 | {$$ = NULL;}
 ;
 
-whileStatement : WHILE expression DO statementSequence END {printf("while statement seen"); struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
+whileStatement : WHILE expression DO statementSequence END {/*printf("while statement seen");*/ struct while_statement_t *while_statement = new_while_statement_t(8, $2, $4); $$ = while_statement; }
 
 writeInt : WRITEINT expression { struct write_int_t *write_int = new_write_int_t(9, $2); $$ = write_int; }
 

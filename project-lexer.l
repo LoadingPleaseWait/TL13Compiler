@@ -15,7 +15,7 @@
 ";"	return SC;
 "*"|"div"|"mod"	{yylval.sIndex = strdup(yytext); return OP2;}
 "+"|"-"	{yylval.sIndex = strdup(yytext); return OP3;}
-"="|"!="|"<"|">"|"<="|">="	{yylval.sIndex = strdup(yytext); return OP4};
+"="|"!="|"<"|">"|"<="|">="	{yylval.sIndex = strdup(yytext); return OP4;}
 
 "if"	return IF;
 "then"	return THEN;
